@@ -32,7 +32,8 @@ stop(_State) -> ok.
 callback_mode() -> state_functions.
 
 init(Opts) ->
-    case watch_modules() of
+    ScanInterval = proplists:get_value(scan_interval, Opts),
+    case watch_modules(ScanInterval) of
         {ok, WatchPaths} ->
             Data = #data{
                 watch_paths = WatchPaths,
@@ -72,7 +73,7 @@ debouncing(_, _, _Data) ->
 
 % Private
 
-watch_modules() ->
+watch_modules(ScanInterval) ->
     Apps = [App || {App, _, _} <- application:loaded_applications()],
     Modules = lists:flatmap(
                 fun(App) ->
@@ -94,17 +95,24 @@ watch_modules() ->
                     Modules
                    ),
     WatchPaths = lists:filter(fun filelib:is_dir/1, lists:usort(ModulePaths)),
-    case watch_paths(WatchPaths) of
+    case watch_paths(ScanInterval, WatchPaths) of
         ok -> {ok, WatchPaths};
         {error, _} = Err -> Err
     end.
 
-watch_paths([Path | Rest]) ->
+watch_paths(infinity, Paths) -> watch_paths_enotify(Paths);
+watch_paths(Interval, Paths) ->
+    case recompile_scanner:start_link(Interval, Paths) of
+        {ok, _} -> ok;
+        {error, _} = Err -> Err
+    end.
+
+watch_paths_enotify([Path | Rest]) ->
     case enotify:start_link(Path, [modified]) of
-        {ok, _} -> watch_paths(Rest);
+        {ok, _} -> watch_paths_enotify(Rest);
         {error, _} = Err -> Err
     end;
-watch_paths([]) ->
+watch_paths_enotify([]) ->
     ok.
 
 find_compile_dir(WatchPaths) ->

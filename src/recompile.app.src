@@ -11,6 +11,7 @@
  , {env,
     [ {compile_cmd, ["rebar3", "compile"]}
     , {debounce_time, 200}
+    , {scan_interval, infinity}
     ]}
  , {modules, []}
  , {maintainers, ["Bach Le"]}
