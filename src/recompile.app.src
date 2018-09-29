@@ -1,0 +1,16 @@
+{application, recompile,
+ [ {description, "Automatic recompilation and reloading"}
+ , {vsn, "0.1.0"}
+ , {registered, [recompile_sup, recompile]}
+ , {mod, {recompile, []}}
+ , {applications,
+    [ kernel
+    , stdlib
+    , enotify
+    ]}
+ , {env,
+    [ {compile_cmd, ["rebar3", "compile"]}
+    , {debounce_time, 200}
+    ]}
+ , {modules, []}
+ ]}.
