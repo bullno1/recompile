@@ -13,4 +13,7 @@
     , {debounce_time, 200}
     ]}
  , {modules, []}
+ , {maintainers, ["Bach Le"]}
+ , {licenses, ["BSD-2-Clause"]}
+ , {links, [{"Github", "https://github.com/bullno1/recompile"}]}
  ]}.
